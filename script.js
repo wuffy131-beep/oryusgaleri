@@ -1,146 +1,180 @@
-// 🔗 Npoint API bağlantısı
-const NPOINT_URL = "https://api.npoint.io/f154cae0f6b12dca533f";
+// =======================
+// ORYUS GALERİ SCRIPT.JS
+// =======================
 
-// 👨‍💼 Admin bilgileri
-const ADMINS = [
-  { username: "AhmetYusufGencan", password: "admin1234" },
-  { username: "wuffymucuk", password: "654321" },
-];
+// API URL base (Vercel kendi domaininde çalışır)
+const API_BASE = "/api";
 
-let currentAdmin = null;
+// =======================
+// 🔐 ADMIN GİRİŞ
+// =======================
+async function adminLogin() {
+  const username = document.getElementById("username").value;
+  const password = document.getElementById("password").value;
 
-// 🔍 Npoint’ten ilanları getir
-async function getAllData() {
   try {
-    const res = await fetch(NPOINT_URL);
-    return await res.json();
+    const res = await fetch(`${API_BASE}/login`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ username, password }),
+    });
+    const data = await res.json();
+
+    if (data.token) {
+      localStorage.setItem("token", data.token);
+      alert("✅ Giriş başarılı!");
+      window.location.href = "/admin.html";
+    } else {
+      alert("❌ Giriş başarısız: " + (data.error || "Bilinmeyen hata"));
+    }
   } catch (err) {
-    console.error("Veri çekilemedi:", err);
-    return { ilanlar: [], iletisim: {} };
+    alert("❌ Sunucuya bağlanılamadı: " + err.message);
   }
 }
 
-// 💾 İlanları kaydet (iletisim alanını koruyarak)
-async function saveIlanlar(yeniIlanlar) {
-  const data = await getAllData();
+// =======================
+// 🚗 İLAN EKLEME
+// =======================
+async function ilanEkle() {
+  const baslik = document.getElementById("baslik").value.trim();
+  const aciklama = document.getElementById("aciklama").value.trim();
+  const resim = document.getElementById("resim").value.trim();
+  const instagram = document.getElementById("instagram").value.trim();
+  const tiktok = document.getElementById("tiktok").value.trim();
+  const token = localStorage.getItem("token");
 
-  const yeniVeri = {
-    ilanlar: yeniIlanlar,
-    iletisim: data.iletisim || {
-      instagram: "@oryusgaleri",
-      tiktok: "@oryusgaleri2",
-    },
-  };
-
-  await fetch(NPOINT_URL, {
-    method: "PUT",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(yeniVeri),
-  });
-}
-
-// 📄 İlanları ekrana yaz
-async function renderIlanlar(container, adminMode = false) {
-  const data = await getAllData();
-  const ilanlar = data.ilanlar || [];
-
-  container.innerHTML = "";
-  if (!ilanlar.length) {
-    container.innerHTML = "<p>Henüz ilan bulunmamaktadır.</p>";
+  if (!baslik || !aciklama) {
+    alert("⚠️ Başlık ve açıklama zorunludur!");
     return;
   }
 
-  ilanlar.forEach((ilan) => {
-    const div = document.createElement("div");
-    div.className = "ilan";
-    div.innerHTML = `
-      <img src="${ilan.resim}" alt="${ilan.baslik}">
-      <h3>${ilan.baslik}</h3>
-      <p>${ilan.aciklama}</p>
-      <p>
-        📸 <a href="https://instagram.com/${ilan.instagram}" target="_blank">${ilan.instagram}</a> |
-        🎵 <a href="https://tiktok.com/@${ilan.tiktok}" target="_blank">${ilan.tiktok}</a>
-      </p>
-      ${adminMode ? `<button class="sil" data-id="${ilan.id}">Sil</button>` : ""}
-    `;
-    container.appendChild(div);
-  });
+  try {
+    const res = await fetch(`${API_BASE}/addIlan`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${token}`,
+      },
+      body: JSON.stringify({ baslik, aciklama, resim, instagram, tiktok }),
+    });
 
-  // 🔴 Silme işlemi
-  if (adminMode) {
-    document.querySelectorAll(".sil").forEach((btn) =>
-      btn.addEventListener("click", async (e) => {
-        const id = Number(e.target.dataset.id);
-        if (!confirm("Bu ilanı silmek istiyor musunuz?")) return;
+    const data = await res.json();
 
-        const data = await getAllData();
-        const yeni = data.ilanlar.filter((x) => x.id !== id);
-        await saveIlanlar(yeni);
-        renderIlanlar(container, true);
-      })
-    );
+    if (data.success) {
+      alert("✅ İlan başarıyla eklendi!");
+      loadIlanlar(); // listeyi yenile
+    } else {
+      alert("❌ Eklenemedi: " + (data.error || "Bilinmeyen hata"));
+    }
+  } catch (err) {
+    alert("❌ Sunucu hatası: " + err.message);
   }
 }
 
-// 🏠 Ana sayfa yükleniyorsa ilanları göster
-const ilanlarContainer = document.getElementById("ilanlarContainer");
-if (ilanlarContainer) renderIlanlar(ilanlarContainer);
+// =======================
+// 🗑️ İLAN SİLME
+// =======================
+async function ilanSil(id) {
+  const token = localStorage.getItem("token");
+  if (!confirm("Bu ilanı silmek istediğine emin misin?")) return;
 
-// 🔐 Admin girişi
-const loginForm = document.getElementById("loginForm");
-if (loginForm) {
-  loginForm.addEventListener("submit", (e) => {
-    e.preventDefault();
-    const u = document.getElementById("username").value.trim();
-    const p = document.getElementById("password").value.trim();
-    const admin = ADMINS.find((a) => a.username === u && a.password === p);
+  try {
+    const res = await fetch(`${API_BASE}/deleteIlan?id=${id}`, {
+      method: "DELETE",
+      headers: {
+        "Authorization": `Bearer ${token}`,
+      },
+    });
+    const data = await res.json();
 
-    if (!admin) {
-      document.getElementById("loginMessage").textContent =
-        "❌ Kullanıcı adı veya şifre hatalı!";
+    if (data.success) {
+      alert("✅ İlan silindi!");
+      loadIlanlar();
+    } else {
+      alert("❌ Silinemedi: " + (data.error || "Bilinmeyen hata"));
+    }
+  } catch (err) {
+    alert("❌ Sunucu hatası: " + err.message);
+  }
+}
+
+// =======================
+// 📜 LOG GÖRÜNTÜLEME (sadece yetkili admin)
+// =======================
+async function loadLogs() {
+  const token = localStorage.getItem("token");
+  const container = document.getElementById("logs");
+
+  if (!container) return;
+
+  try {
+    const res = await fetch(`${API_BASE}/logs`, {
+      headers: { "Authorization": `Bearer ${token}` },
+    });
+    const data = await res.json();
+
+    if (Array.isArray(data)) {
+      container.innerHTML = data
+        .map(
+          (log) => `
+          <div class="log-item">
+            <b>${log.admin_username}</b> — ${log.action}<br>
+            <small>${log.details}</small>
+          </div>`
+        )
+        .join("");
+    } else {
+      container.innerHTML = `<p>❌ Log yüklenemedi: ${data.error || "Bilinmeyen hata"}</p>`;
+    }
+  } catch (err) {
+    container.innerHTML = `<p>❌ Bağlantı hatası: ${err.message}</p>`;
+  }
+}
+
+// =======================
+// 🏠 ANA SAYFADA İLANLARI GÖSTERME
+// =======================
+async function loadIlanlar() {
+  const container = document.getElementById("ilanlar");
+  if (!container) return;
+
+  try {
+    const res = await fetch(`${API_BASE}/ilanlar`);
+    const data = await res.json();
+
+    if (!Array.isArray(data) || data.length === 0) {
+      container.innerHTML = "<p>Henüz ilan bulunmuyor.</p>";
       return;
     }
 
-    currentAdmin = admin;
-    document.getElementById("loginSection").classList.add("hidden");
-    document.getElementById("panelSection").classList.remove("hidden");
-    renderIlanlar(document.getElementById("ilanListesiAdmin"), true);
-  });
+    container.innerHTML = data
+      .map(
+        (ilan) => `
+        <div class="ilan">
+          <img src="${ilan.resim || "gorsel.png"}" alt="Araç Görseli">
+          <h3>${ilan.baslik}</h3>
+          <p>${ilan.aciklama}</p>
+          <div class="contact">
+            <a href="https://instagram.com/${ilan.instagram}" target="_blank">📸 Instagram</a>
+            <a href="https://tiktok.com/@${ilan.tiktok}" target="_blank">🎵 TikTok</a>
+          </div>
+          ${
+            localStorage.getItem("token")
+              ? `<button onclick="ilanSil(${ilan.id})" class="sil">Sil</button>`
+              : ""
+          }
+        </div>`
+      )
+      .join("");
+  } catch (err) {
+    container.innerHTML = `<p>❌ Veriler alınamadı: ${err.message}</p>`;
+  }
 }
 
-// ➕ İlan ekleme
-const addForm = document.getElementById("addForm");
-if (addForm) {
-  addForm.addEventListener("submit", async (e) => {
-    e.preventDefault();
-    const baslik = document.getElementById("ilanBaslik").value.trim();
-    const aciklama = document.getElementById("ilanAciklama").value.trim();
-    const file = document.getElementById("ilanResim").files[0];
-
-    if (!file) {
-      alert("Lütfen bir resim seçin!");
-      return;
-    }
-
-    const reader = new FileReader();
-    reader.onload = async () => {
-      const data = await getAllData();
-      const yeniIlanlar = data.ilanlar || [];
-
-      yeniIlanlar.push({
-        id: Date.now(),
-        baslik,
-        aciklama,
-        resim: reader.result,
-        instagram: "oyrusgaleri",
-        tiktok: "oyrusgaleri2",
-      });
-
-      await saveIlanlar(yeniIlanlar);
-      alert("✅ İlan başarıyla eklendi!");
-      renderIlanlar(document.getElementById("ilanListesiAdmin"), true);
-      addForm.reset();
-    };
-    reader.readAsDataURL(file);
-  });
-}
+// =======================
+// SAYFA YÜKLENİNCE
+// =======================
+document.addEventListener("DOMContentLoaded", () => {
+  loadIlanlar();
+  loadLogs();
+});
