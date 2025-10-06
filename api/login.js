@@ -2,17 +2,14 @@ import { Pool } from "pg";
 import jwt from "jsonwebtoken";
 
 const pool = new Pool({ connectionString: process.env.DATABASE_URL });
+const JWT_SECRET = process.env.JWT_SECRET || "default_secret"; // Fallback
 
 export default async function handler(req, res) {
-  if (req.method !== "POST") {
-    return res.status(405).send("Method Not Allowed");
-  }
+  if (req.method !== "POST") return res.status(405).send("Method Not Allowed");
+
+  const { username, password } = req.body;
 
   try {
-    const { username, password } = req.body;
-    if (!username || !password)
-      return res.status(400).json({ error: "Kullanıcı adı veya şifre eksik" });
-
     const { rows } = await pool.query(
       "SELECT * FROM admins WHERE username=$1 AND password=$2",
       [username, password]
@@ -21,15 +18,9 @@ export default async function handler(req, res) {
     if (rows.length === 0)
       return res.status(401).json({ error: "Geçersiz kullanıcı veya şifre" });
 
-    const token = jwt.sign(
-      { username },
-      process.env.JWT_SECRET || "default_secret",
-      { expiresIn: "2h" }
-    );
-
-    res.status(200).json({ token, username });
+    const token = jwt.sign({ username }, JWT_SECRET, { expiresIn: "2h" });
+    res.status(200).json({ success: true, token });
   } catch (err) {
-    console.error("❌ login.js hata:", err);
     res.status(500).json({ error: err.message });
   }
 }
