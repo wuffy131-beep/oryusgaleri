@@ -1,180 +1,151 @@
-// =======================
-// ORYUS GALERİ SCRIPT.JS
-// =======================
-
-// API URL base (Vercel kendi domaininde çalışır)
 const API_BASE = "/api";
+let token = localStorage.getItem("token");
 
-// =======================
-// 🔐 ADMIN GİRİŞ
-// =======================
-async function adminLogin() {
-  const username = document.getElementById("username").value;
-  const password = document.getElementById("password").value;
+// Sayfa yüklendiğinde giriş kontrolü
+document.addEventListener("DOMContentLoaded", () => {
+  const loginSection = document.getElementById("loginSection");
+  const adminPanel = document.getElementById("adminPanel");
+  const logoutBtn = document.getElementById("logoutBtn");
 
-  try {
+  if (token) {
+    loginSection.style.display = "none";
+    adminPanel.style.display = "block";
+    logoutBtn.style.display = "block";
+    ilanlariGetir();
+  }
+
+  // Giriş işlemi
+  document.getElementById("loginBtn")?.addEventListener("click", async () => {
+    const username = document.getElementById("username").value.trim();
+    const password = document.getElementById("password").value.trim();
+
     const res = await fetch(`${API_BASE}/login`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ username, password }),
     });
+
     const data = await res.json();
+    const msg = document.getElementById("loginMessage");
 
     if (data.token) {
       localStorage.setItem("token", data.token);
-      alert("✅ Giriş başarılı!");
-      window.location.href = "/admin.html";
+      msg.textContent = "✅ Giriş başarılı!";
+      setTimeout(() => location.reload(), 1000);
     } else {
-      alert("❌ Giriş başarısız: " + (data.error || "Bilinmeyen hata"));
+      msg.textContent = `❌ Giriş başarısız: ${data.error || "Bilinmeyen hata"}`;
     }
-  } catch (err) {
-    alert("❌ Sunucuya bağlanılamadı: " + err.message);
-  }
+  });
+
+  // Çıkış yap
+  logoutBtn?.addEventListener("click", () => {
+    localStorage.removeItem("token");
+    location.reload();
+  });
+
+  // İlan ekle
+  document.getElementById("ekleBtn")?.addEventListener("click", async () => {
+    const baslik = document.getElementById("baslik").value.trim();
+    const aciklama = document.getElementById("aciklama").value.trim();
+    const instagram = document.getElementById("instagram").value.trim();
+    const tiktok = document.getElementById("tiktok").value.trim();
+    const file = document.getElementById("resim").files[0];
+    const msg = document.getElementById("ekleMessage");
+
+    if (!baslik || !aciklama) {
+      msg.textContent = "⚠️ Başlık ve açıklama zorunludur.";
+      return;
+    }
+
+    let resimBase64 = "";
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = async () => {
+        resimBase64 = reader.result;
+        await ilanEkle(baslik, aciklama, resimBase64, instagram, tiktok, msg);
+      };
+      reader.readAsDataURL(file);
+    } else {
+      await ilanEkle(baslik, aciklama, "", instagram, tiktok, msg);
+    }
+  });
+
+  // Logları göster
+  document.getElementById("loglariGoster")?.addEventListener("click", async () => {
+    const res = await fetch(`${API_BASE}/logs`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    const logs = await res.json();
+    const ul = document.getElementById("logListesi");
+    ul.innerHTML = "";
+    logs.forEach(l => {
+      const li = document.createElement("li");
+      li.textContent = `${l.created_at} - ${l.admin}: ${l.action} (${l.detail})`;
+      ul.appendChild(li);
+    });
+  });
+});
+
+// 🔧 Yardımcı fonksiyonlar
+async function ilanlariGetir() {
+  const res = await fetch(`${API_BASE}/ilanlar`);
+  const ilanlar = await res.json();
+  const container = document.getElementById("ilanListesi");
+  container.innerHTML = "";
+
+  ilanlar.forEach(i => {
+    const div = document.createElement("div");
+    div.className = "ilan";
+    div.innerHTML = `
+      <h3>${i.baslik}</h3>
+      <p>${i.aciklama}</p>
+      ${i.resim ? `<img src="${i.resim}" width="200"/>` : ""}
+      <p>📸 Instagram: ${i.instagram || "-"} | 🎬 TikTok: ${i.tiktok || "-"}</p>
+      <button onclick="ilanSil(${i.id})">Sil</button>
+    `;
+    container.appendChild(div);
+  });
 }
 
-// =======================
-// 🚗 İLAN EKLEME
-// =======================
-async function ilanEkle() {
-  const baslik = document.getElementById("baslik").value.trim();
-  const aciklama = document.getElementById("aciklama").value.trim();
-  const resim = document.getElementById("resim").value.trim();
-  const instagram = document.getElementById("instagram").value.trim();
-  const tiktok = document.getElementById("tiktok").value.trim();
-  const token = localStorage.getItem("token");
-
-  if (!baslik || !aciklama) {
-    alert("⚠️ Başlık ve açıklama zorunludur!");
-    return;
-  }
-
+async function ilanEkle(baslik, aciklama, resim, instagram, tiktok, msg) {
   try {
     const res = await fetch(`${API_BASE}/addIlan`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "Authorization": `Bearer ${token}`,
+        Authorization: `Bearer ${token}`,
       },
       body: JSON.stringify({ baslik, aciklama, resim, instagram, tiktok }),
     });
 
     const data = await res.json();
-
     if (data.success) {
-      alert("✅ İlan başarıyla eklendi!");
-      loadIlanlar(); // listeyi yenile
+      msg.textContent = "✅ İlan başarıyla eklendi!";
+      ilanlariGetir();
     } else {
-      alert("❌ Eklenemedi: " + (data.error || "Bilinmeyen hata"));
+      msg.textContent = `❌ Hata: ${data.error || "Eklenemedi"}`;
     }
   } catch (err) {
-    alert("❌ Sunucu hatası: " + err.message);
+    msg.textContent = "❌ Sunucuya bağlanılamadı.";
   }
 }
 
-// =======================
-// 🗑️ İLAN SİLME
-// =======================
 async function ilanSil(id) {
-  const token = localStorage.getItem("token");
   if (!confirm("Bu ilanı silmek istediğine emin misin?")) return;
 
   try {
     const res = await fetch(`${API_BASE}/deleteIlan?id=${id}`, {
       method: "DELETE",
-      headers: {
-        "Authorization": `Bearer ${token}`,
-      },
+      headers: { Authorization: `Bearer ${token}` },
     });
     const data = await res.json();
-
     if (data.success) {
       alert("✅ İlan silindi!");
-      loadIlanlar();
+      ilanlariGetir();
     } else {
-      alert("❌ Silinemedi: " + (data.error || "Bilinmeyen hata"));
+      alert(`❌ Silinemedi: ${data.error}`);
     }
-  } catch (err) {
-    alert("❌ Sunucu hatası: " + err.message);
+  } catch {
+    alert("❌ Sunucuya bağlanılamadı.");
   }
 }
-
-// =======================
-// 📜 LOG GÖRÜNTÜLEME (sadece yetkili admin)
-// =======================
-async function loadLogs() {
-  const token = localStorage.getItem("token");
-  const container = document.getElementById("logs");
-
-  if (!container) return;
-
-  try {
-    const res = await fetch(`${API_BASE}/logs`, {
-      headers: { "Authorization": `Bearer ${token}` },
-    });
-    const data = await res.json();
-
-    if (Array.isArray(data)) {
-      container.innerHTML = data
-        .map(
-          (log) => `
-          <div class="log-item">
-            <b>${log.admin_username}</b> — ${log.action}<br>
-            <small>${log.details}</small>
-          </div>`
-        )
-        .join("");
-    } else {
-      container.innerHTML = `<p>❌ Log yüklenemedi: ${data.error || "Bilinmeyen hata"}</p>`;
-    }
-  } catch (err) {
-    container.innerHTML = `<p>❌ Bağlantı hatası: ${err.message}</p>`;
-  }
-}
-
-// =======================
-// 🏠 ANA SAYFADA İLANLARI GÖSTERME
-// =======================
-async function loadIlanlar() {
-  const container = document.getElementById("ilanlar");
-  if (!container) return;
-
-  try {
-    const res = await fetch(`${API_BASE}/ilanlar`);
-    const data = await res.json();
-
-    if (!Array.isArray(data) || data.length === 0) {
-      container.innerHTML = "<p>Henüz ilan bulunmuyor.</p>";
-      return;
-    }
-
-    container.innerHTML = data
-      .map(
-        (ilan) => `
-        <div class="ilan">
-          <img src="${ilan.resim || "gorsel.png"}" alt="Araç Görseli">
-          <h3>${ilan.baslik}</h3>
-          <p>${ilan.aciklama}</p>
-          <div class="contact">
-            <a href="https://instagram.com/${ilan.instagram}" target="_blank">📸 Instagram</a>
-            <a href="https://tiktok.com/@${ilan.tiktok}" target="_blank">🎵 TikTok</a>
-          </div>
-          ${
-            localStorage.getItem("token")
-              ? `<button onclick="ilanSil(${ilan.id})" class="sil">Sil</button>`
-              : ""
-          }
-        </div>`
-      )
-      .join("");
-  } catch (err) {
-    container.innerHTML = `<p>❌ Veriler alınamadı: ${err.message}</p>`;
-  }
-}
-
-// =======================
-// SAYFA YÜKLENİNCE
-// =======================
-document.addEventListener("DOMContentLoaded", () => {
-  loadIlanlar();
-  loadLogs();
-});
