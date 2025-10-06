@@ -1,67 +1,52 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="tr">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Oyrus Galeri - Admin Panel</title>
-  <link rel="stylesheet" href="style.css" />
+  <title>Oryus Galeri - Admin Paneli</title>
+  <link rel="stylesheet" href="/style.css" />
+  <script defer src="/script.js"></script>
 </head>
 <body>
-  <header class="admin-header">
-    <h1>Oryus Galeri Admin Panel</h1>
-    <button onclick="window.location.href='/'">🏠 Ana Sayfa</button>
+  <header>
+    <h1>🚗 Oryus Galeri Admin</h1>
+    <nav>
+      <button id="logoutBtn" style="display:none;">Çıkış Yap</button>
+    </nav>
   </header>
 
-  <!-- GİRİŞ EKRANI -->
-  <section id="loginSection" class="login-section">
-    <h2>🔐 Yönetici Girişi</h2>
-    <input type="text" id="username" placeholder="Kullanıcı adı" />
-    <input type="password" id="password" placeholder="Şifre" />
-    <button onclick="adminLogin()">Giriş Yap</button>
-  </section>
+  <main>
+    <!-- Login Alanı -->
+    <section id="loginSection">
+      <h2>🔐 Admin Girişi</h2>
+      <input type="text" id="username" placeholder="Kullanıcı adı" />
+      <input type="password" id="password" placeholder="Şifre" />
+      <button id="loginBtn">Giriş Yap</button>
+      <p id="loginMessage"></p>
+    </section>
 
-  <!-- ADMİN PANELİ -->
-  <section id="panelSection" class="panel-section" style="display:none;">
-    <h2>📋 İlan Ekle</h2>
-    <div class="form-group">
-      <input type="text" id="baslik" placeholder="Araç başlığı" />
-      <textarea id="aciklama" placeholder="Araç açıklaması"></textarea>
-      <input type="text" id="resim" placeholder="Görsel URL'si" />
-      <input type="text" id="instagram" placeholder="Instagram kullanıcı adı (oryusgaleri)" />
-      <input type="text" id="tiktok" placeholder="Tiktok kullanıcı adı (oryusgaleri2)" />
-      <button onclick="ilanEkle()">➕ İlan Ekle</button>
-    </div>
+    <!-- İlan Ekleme Alanı -->
+    <section id="adminPanel" style="display:none;">
+      <h2>📋 Yeni İlan Ekle</h2>
+      <input type="text" id="baslik" placeholder="İlan Başlığı" />
+      <textarea id="aciklama" placeholder="Açıklama"></textarea>
+      <input type="text" id="instagram" placeholder="Instagram Kullanıcı Adı" />
+      <input type="text" id="tiktok" placeholder="Tiktok Kullanıcı Adı" />
+      <input type="file" id="resim" accept="image/*" />
+      <button id="ekleBtn">İlan Ekle</button>
+      <p id="ekleMessage"></p>
 
-    <h2>🗂️ Mevcut İlanlar</h2>
-    <div id="ilanlar" class="ilanlar-listesi"></div>
+      <h2>🗑️ İlanları Yönet</h2>
+      <div id="ilanListesi"></div>
 
-    <h2>🧾 Log Kayıtları (sadece yetkili admin)</h2>
-    <div id="logs" class="log-listesi"></div>
+      <h2>🧾 Loglar</h2>
+      <button id="loglariGoster">Logları Görüntüle</button>
+      <ul id="logListesi"></ul>
+    </section>
+  </main>
 
-    <button class="logout" onclick="logout()">🚪 Çıkış Yap</button>
-  </section>
-
-  <script src="script.js"></script>
-  <script>
-    // Oturum kontrolü
-    document.addEventListener("DOMContentLoaded", () => {
-      const token = localStorage.getItem("token");
-      if (token) {
-        document.getElementById("loginSection").style.display = "none";
-        document.getElementById("panelSection").style.display = "block";
-        loadIlanlar();
-        loadLogs();
-      } else {
-        document.getElementById("loginSection").style.display = "block";
-        document.getElementById("panelSection").style.display = "none";
-      }
-    });
-
-    function logout() {
-      localStorage.removeItem("token");
-      alert("Çıkış yapıldı.");
-      window.location.reload();
-    }
-  </script>
+  <footer>
+    <p>© 2025 Oryus Galeri | Tüm Hakları Saklıdır</p>
+  </footer>
 </body>
 </html>
