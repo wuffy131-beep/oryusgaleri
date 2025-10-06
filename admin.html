@@ -1,52 +1,56 @@
 <!DOCTYPE html>
 <html lang="tr">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Oryus Galeri - Admin Paneli</title>
-  <link rel="stylesheet" href="/style.css" />
-  <script defer src="/script.js"></script>
-</head>
-<body>
-  <header>
-    <h1>🚗 Oryus Galeri Admin</h1>
-    <nav>
-      <button id="logoutBtn" style="display:none;">Çıkış Yap</button>
-    </nav>
-  </header>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Admin Panel - Oryus Galeri</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <header>
+      <h1>⚙️ Oryus Galeri - Admin Paneli</h1>
+      <div class="theme-toggle">
+        <button id="themeButton">🌙 / ☀️</button>
+      </div>
+    </header>
 
-  <main>
-    <!-- Login Alanı -->
-    <section id="loginSection">
-      <h2>🔐 Admin Girişi</h2>
-      <input type="text" id="username" placeholder="Kullanıcı adı" />
-      <input type="password" id="password" placeholder="Şifre" />
+    <main id="adminLogin">
+      <h2>🔑 Admin Girişi</h2>
+      <input id="username" type="text" placeholder="Kullanıcı adı" />
+      <input id="password" type="password" placeholder="Şifre" />
       <button id="loginBtn">Giriş Yap</button>
-      <p id="loginMessage"></p>
-    </section>
+      <p id="loginResult"></p>
+    </main>
 
-    <!-- İlan Ekleme Alanı -->
-    <section id="adminPanel" style="display:none;">
-      <h2>📋 Yeni İlan Ekle</h2>
-      <input type="text" id="baslik" placeholder="İlan Başlığı" />
-      <textarea id="aciklama" placeholder="Açıklama"></textarea>
-      <input type="text" id="instagram" placeholder="Instagram Kullanıcı Adı" />
-      <input type="text" id="tiktok" placeholder="Tiktok Kullanıcı Adı" />
-      <input type="file" id="resim" accept="image/*" />
-      <button id="ekleBtn">İlan Ekle</button>
-      <p id="ekleMessage"></p>
+    <main id="adminPanel" style="display:none;">
+      <section>
+        <h2>🆕 Yeni İlan Ekle</h2>
+        <input id="baslik" type="text" placeholder="İlan başlığı" />
+        <textarea id="aciklama" placeholder="Açıklama"></textarea>
+        <input id="resim" type="file" accept="image/*" />
+        <input id="instagram" type="text" placeholder="@Instagram" />
+        <input id="tiktok" type="text" placeholder="@Tiktok" />
+        <button id="ilanEkleBtn">İlan Ekle</button>
+        <p id="ilanSonuc"></p>
+      </section>
 
-      <h2>🗑️ İlanları Yönet</h2>
-      <div id="ilanListesi"></div>
+      <section>
+        <h2>🗑️ İlanlar</h2>
+        <div id="ilanListesi"></div>
+      </section>
 
-      <h2>🧾 Loglar</h2>
-      <button id="loglariGoster">Logları Görüntüle</button>
-      <ul id="logListesi"></ul>
-    </section>
-  </main>
+      <section id="logSection" style="display:none;">
+        <h2>📜 Log Kayıtları</h2>
+        <div id="logListesi">Yükleniyor...</div>
+      </section>
 
-  <footer>
-    <p>© 2025 Oryus Galeri | Tüm Hakları Saklıdır</p>
-  </footer>
-</body>
+      <button id="cikisBtn" style="margin-top:20px;">🚪 Çıkış Yap</button>
+    </main>
+
+    <footer>
+      <p>© 2025 Oryus Galeri</p>
+    </footer>
+
+    <script src="script.js"></script>
+  </body>
 </html>
