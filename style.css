@@ -106,7 +106,94 @@ footer {
   padding: 20px;
   border-top: 2px solid var(--blue);
 }
+/* ==== Admin Panel Stil ==== */
+body {
+  font-family: Arial, sans-serif;
+  background: #f5f6fa;
+  color: #222;
+  margin: 0;
+  padding: 0;
+}
+
+header.admin-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #1e40af;
+  color: white;
+  padding: 10px 20px;
+}
+
+header.admin-header button {
+  background: white;
+  color: #1e40af;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.login-section, .panel-section {
+  max-width: 700px;
+  margin: 40px auto;
+  background: white;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+input, textarea {
+  width: 100%;
+  margin-bottom: 10px;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  font-size: 15px;
+}
+
+button {
+  background: #1e40af;
+  color: white;
+  border: none;
+  padding: 10px 15px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+button:hover {
+  background: #3b82f6;
+}
+
+.ilanlar-listesi .ilan {
+  border: 1px solid #ddd;
+  padding: 10px;
+  margin: 8px 0;
+  border-radius: 8px;
+}
+
+.ilanlar-listesi .ilan img {
+  max-width: 100%;
+  border-radius: 8px;
+}
+
+.log-listesi {
+  background: #f3f4f6;
+  padding: 10px;
+  border-radius: 8px;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.logout {
+  margin-top: 20px;
+  background: #dc2626;
+}
+
+.logout:hover {
+  background: #ef4444;
+}
 
 .error {
   color: red;
 }
+
