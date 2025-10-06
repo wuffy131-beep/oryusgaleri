@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin - Oyrus Galeri</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header class="site-header">
+    <div class="wrap">
+      <a class="brand" href="index.html">Oyrus Galeri</a>
+      <nav><a href="index.html">Ana Sayfa</a></nav>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <section id="loginSection" class="card">
+      <h2>🔐 Admin Girişi</h2>
+      <form id="loginForm">
+        <input id="username" placeholder="Kullanıcı Adı" required />
+        <input id="password" type="password" placeholder="Şifre" required />
+        <button type="submit">Giriş</button>
+        <p id="loginMessage" class="error"></p>
+      </form>
+    </section>
+
+    <section id="panelSection" class="card hidden">
+      <h2>Yeni İlan Ekle</h2>
+      <form id="addForm">
+        <input id="ilanBaslik" placeholder="Başlık" required />
+        <textarea id="ilanAciklama" placeholder="Açıklama" required></textarea>
+        <input id="ilanResim" type="file" accept="image/*" required />
+        <button type="submit">İlanı Ekle</button>
+      </form>
+
+      <h3>Mevcut İlanlar</h3>
+      <div id="ilanListesiAdmin" class="ilanlar"></div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap">Oyrus Galeri - Admin Paneli</div>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>
