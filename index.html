@@ -1,42 +1,105 @@
 <!DOCTYPE html>
 <html lang="tr">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Oryus Galeri - Güvenilir Araç Alım Satım Platformu 🚗</title>
-    <meta name="description" content="Oryus Galeri - 2024 yılında kurulmuş, 2 arkadaş tarafından işletilen güvenilir araç alım satım platformu." />
-    <meta name="keywords" content="oryus galeri, araba galerisi, ikinci el araba, sıfır araba, oryus, oyrus galeri, car parking, takas yok, indirim yok, araç, cmp" />
-    <meta name="theme-color" content="#1e3a8a" />
-    <link rel="stylesheet" href="style.css" />
-    <script defer src="script.js"></script>
-  </head>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Oryus Galeri</title>
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    #kapaliUyari {
+      position: fixed;
+      top: -150px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #ff3b3b;
+      color: white;
+      padding: 20px 40px;
+      border-radius: 10px;
+      box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+      font-size: 1.2rem;
+      animation: sekme 1.8s ease-out forwards;
+      text-align: center;
+      z-index: 1000;
+    }
 
-  <body>
-    <header>
-      <h1>🚗 Oryus Galeri</h1>
-      <nav id="menu">
-        <a href="index.html" class="active">Ana Sayfa</a>
-        <a href="ilanlar.html">İlanlar</a>
-        <a href="hakkimizda.html">Hakkımızda</a>
-        <a href="sss.html">SSS</a>
-        <a href="admin.html">Admin</a>
-      </nav>
-      <button id="menuBtn">☰</button>
-    </header>
+    @keyframes sekme {
+      0% { top: -150px; }
+      40% { top: 40px; }
+      60% { top: 20px; }
+      80% { top: 30px; }
+      100% { top: 25px; }
+    }
 
-    <main id="mainContent">
-      <h2>🕒 Çalışma Saatleri</h2>
-      <p>Oryus Galeri çalışma saatleri: <strong>15:00 - 22:00</strong></p>
-      <p id="statusText">Durum yükleniyor...</p>
-      <button id="ilanGorBtn" style="display:none;" onclick="window.location='ilanlar.html'">
-        📋 İlanları Görüntüle
-      </button>
-    </main>
+    #kapaliUyari button {
+      margin-top: 10px;
+      background: white;
+      color: #ff3b3b;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>🚗 Oryus Galeri</h1>
+    <nav>
+      <a href="index.html" class="active">Ana Sayfa</a>
+      <a href="admin.html">Admin Girişi</a>
+    </nav>
+  </header>
 
-    <footer>
-      <p>📸 Instagram: <a href="https://www.instagram.com/oryusgaleri" target="_blank">@oryusgaleri</a></p>
-      <p>🎵 TikTok: <a href="https://www.tiktok.com/@oryusgaleri2" target="_blank">@oryusgaleri2</a></p>
-      <p>© 2025 Oryus Galeri | Tüm Hakları Saklıdır</p>
-    </footer>
-  </body>
+  <main>
+    <section id="ilanlar">
+      <h2>Güncel İlanlar</h2>
+      <div id="ilanListesi" class="ilan-listesi">
+        <div class="loading">Yükleniyor...</div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="social">
+      <a href="https://www.instagram.com/oryusgaleri" target="_blank">📸 @oryusgaleri</a>
+      <a href="https://www.tiktok.com/@oryusgaleri2" target="_blank">🎵 @oryusgaleri2</a>
+    </div>
+    <p>© 2025 Oryus Galeri | Tüm Hakları Saklıdır</p>
+  </footer>
+
+  <div id="kapaliUyari" style="display:none;">
+    🕒 Şu anda kapalıyız! <br>
+    Çalışma saatlerimiz: <b>15:00 - 22:00</b><br>
+    <button onclick="window.location.href='ilanlar.html'">🔓 İlanları Gör</button>
+  </div>
+
+  <script>
+    const saat = new Date().getHours();
+    if (saat < 15 || saat >= 22) {
+      document.getElementById("kapaliUyari").style.display = "block";
+    } else {
+      // aktif ilanları yükle
+      fetch("api/ilanlar")
+        .then(res => res.json())
+        .then(data => {
+          const list = document.getElementById("ilanListesi");
+          list.innerHTML = "";
+          data.forEach(ilan => {
+            const div = document.createElement("div");
+            div.className = "ilan";
+            div.innerHTML = `
+              <img src="${ilan.resim}" alt="${ilan.baslik}" />
+              <h3>${ilan.baslik}</h3>
+              <p>${ilan.aciklama}</p>
+              <p><b>Fiyat:</b> ${ilan.fiyat || "Belirtilmedi"} TL</p>
+              <a href="${ilan.instagram}" target="_blank">📸 Instagram</a> |
+              <a href="${ilan.tiktok}" target="_blank">🎵 Tiktok</a>
+            `;
+            list.appendChild(div);
+          });
+        });
+    }
+  </script>
+</body>
 </html>
