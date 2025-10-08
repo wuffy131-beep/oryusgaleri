@@ -1,6 +1,9 @@
 import { Pool } from "pg";
 
-const pool = new Pool({ connectionString: process.env.DATABASE_URL });
+const pool = new Pool({
+  connectionString: process.env.DATABASE_URL,
+  ssl: { rejectUnauthorized: false },
+});
 
 export default async function handler(req, res) {
   if (req.method !== "GET") return res.status(405).send("Method Not Allowed");
