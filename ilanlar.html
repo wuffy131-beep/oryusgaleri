@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tüm İlanlar - Oryus Galeri</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header>
+    <h1>🚗 Oryus Galeri - Tüm İlanlar</h1>
+    <nav>
+      <a href="index.html">Ana Sayfa</a>
+      <a href="admin.html">Admin Girişi</a>
+    </nav>
+  </header>
+
+  <main>
+    <section id="ilanlar">
+      <h2>Tüm İlanlar</h2>
+      <div id="ilanListesi" class="ilan-listesi">
+        <p>Yükleniyor...</p>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    fetch("api/ilanlar")
+      .then(res => res.json())
+      .then(data => {
+        const list = document.getElementById("ilanListesi");
+        list.innerHTML = "";
+        data.forEach(ilan => {
+          const div = document.createElement("div");
+          div.className = "ilan";
+          div.innerHTML = `
+            <img src="${ilan.resim}" alt="${ilan.baslik}">
+            <h3>${ilan.baslik}</h3>
+            <p>${ilan.aciklama}</p>
+            <p><b>Fiyat:</b> ${ilan.fiyat || "Belirtilmedi"} TL</p>
+            <a href="${ilan.instagram}" target="_blank">📸 Instagram</a> |
+            <a href="${ilan.tiktok}" target="_blank">🎵 Tiktok</a>
+          `;
+          list.appendChild(div);
+        });
+      });
+  </script>
+
+  <footer>
+    <p>© 2025 Oryus Galeri | Tüm Hakları Saklıdır</p>
+  </footer>
+</body>
+</html>
