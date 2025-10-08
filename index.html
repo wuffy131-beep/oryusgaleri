@@ -3,63 +3,187 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Oryus Galeri</title>
+  <title>İlanlar - Oryus Galeri</title>
   <link rel="stylesheet" href="style.css" />
+  <style>
+    body {
+      font-family: "Segoe UI", sans-serif;
+      background: linear-gradient(135deg, #1e3a8a, #0f172a);
+      color: #f1f5f9;
+      margin: 0;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    header {
+      width: 100%;
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+      padding: 1rem;
+      text-align: center;
+      color: white;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+
+    nav {
+      margin-top: 0.5rem;
+    }
+
+    nav a {
+      color: #f1f5f9;
+      margin: 0 10px;
+      text-decoration: none;
+      font-weight: 600;
+      transition: 0.2s;
+    }
+
+    nav a:hover {
+      color: #38bdf8;
+    }
+
+    h1 {
+      font-size: 1.8rem;
+      margin-bottom: 0.3rem;
+    }
+
+    main {
+      max-width: 1000px;
+      width: 90%;
+      margin: 2rem auto;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .ilan-listesi {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1.5rem;
+      width: 100%;
+    }
+
+    .ilan {
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 10px;
+      padding: 1rem;
+      text-align: center;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+      transition: transform 0.2s;
+    }
+
+    .ilan:hover {
+      transform: translateY(-5px);
+    }
+
+    .ilan img {
+      max-width: 100%;
+      border-radius: 8px;
+      height: 200px;
+      object-fit: cover;
+    }
+
+    .ilan h3 {
+      margin: 0.5rem 0;
+      font-size: 1.1rem;
+    }
+
+    .ilan p {
+      font-size: 0.95rem;
+      opacity: 0.9;
+    }
+
+    footer {
+      text-align: center;
+      margin-top: auto;
+      padding: 1rem;
+      color: #94a3b8;
+    }
+
+    button {
+      background: #2563eb;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      padding: 0.5rem 1rem;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+
+    button:hover {
+      background: #1d4ed8;
+    }
+
+    .modal {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(0,0,0,0.8);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+    }
+
+    .modal-content {
+      background: #1e293b;
+      padding: 2rem;
+      border-radius: 10px;
+      max-width: 500px;
+      color: white;
+      text-align: center;
+    }
+
+    .modal img {
+      width: 100%;
+      border-radius: 8px;
+      margin-bottom: 1rem;
+    }
+  </style>
 </head>
 <body>
   <header>
     <h1> Oryus Galeri</h1>
     <nav>
       <a href="index.html">Ana Sayfa</a>
-      <a href="admin.html">Admin Girişi</a>
+      <a href="ilanlar.html" class="active">İlanlar</a>
+      <a href="hakkimizda.html">Hakkımızda</a>
+      <a href="sss.html">SSS</a>
+      <a href="admin.html">Admin Panel</a>
     </nav>
   </header>
 
-    <section id="ilanlar">
-      <h2>Güncel İlanlar</h2>
-      <div id="ilanListesi" class="ilan-listesi">Yükleniyor...</div>
-    </section>
+  <main>
+    <h2>Güncel İlanlar</h2>
+    <div id="ilanListesi" class="ilan-listesi">Yükleniyor...</div>
   </main>
 
   <footer>
-    <div class="social">
-      <a href="https://www.instagram.com/oryusgaleri" target="_blank">📸 Instagram</a>
-      <a href="https://www.tiktok.com/@oryusgaleri2" target="_blank">🎵 TikTok</a>
-    </div>
     <p>© 2025 Oryus Galeri | Tüm Hakları Saklıdır</p>
   </footer>
 
+  <div id="modal" class="modal" onclick="kapatModal(event)">
+    <div class="modal-content" id="modalContent"></div>
+  </div>
+
   <script>
     const API = "https://oryusgaleri.vercel.app/api";
-
-    async function kontrolEt() {
-      try {
-        const res = await fetch(`${API}/status`);
-        const data = await res.json();
-
-        if (!data.aktif) {
-          document.getElementById("kapaliEkran").classList.remove("hidden");
-          document.getElementById("ilanlar").classList.add("hidden");
-        } else {
-          ilanlariGetir();
-        }
-      } catch (e) {
-        document.getElementById("ilanListesi").innerHTML = "<p style='color:red;'>Sunucuya bağlanılamadı.</p>";
-      }
-    }
 
     async function ilanlariGetir() {
       const list = document.getElementById("ilanListesi");
       try {
         const res = await fetch(`${API}/ilanlar`);
         const data = await res.json();
+
         list.innerHTML = data.map(i => `
           <div class="ilan">
-            <img src="${i.resim}" alt="">
+            <img src="${i.resim}" alt="${i.baslik}">
             <h3>${i.baslik}</h3>
-            <p>${i.aciklama}</p>
-            <p><b>${i.fiyat || ""} TL</b></p>
-            <button onclick="alert('${i.aciklama.replace(/'/g, '')}')">Detay</button>
+            <p><b>${i.fiyat || "Fiyat Belirtilmemiş"} TL</b></p>
+            <button onclick='detayGoster(${JSON.stringify(i)})'>Detay</button>
           </div>
         `).join("");
       } catch {
@@ -67,8 +191,28 @@
       }
     }
 
-    kontrolEt();
+    function detayGoster(ilan) {
+      const modal = document.getElementById("modal");
+      const content = document.getElementById("modalContent");
+      content.innerHTML = `
+        <img src="${ilan.resim}" alt="">
+        <h2>${ilan.baslik}</h2>
+        <p>${ilan.aciklama}</p>
+        <p><b>${ilan.fiyat} TL</b></p>
+        <p>📸 <a href="https://instagram.com/${ilan.instagram}" target="_blank">@${ilan.instagram}</a></p>
+        <p>🎵 <a href="https://tiktok.com/@${ilan.tiktok}" target="_blank">@${ilan.tiktok}</a></p>
+        <button onclick="kapatModal()">Kapat</button>
+      `;
+      modal.style.display = "flex";
+    }
+
+    function kapatModal(e) {
+      if (!e || e.target.id === "modal") {
+        document.getElementById("modal").style.display = "none";
+      }
+    }
+
+    ilanlariGetir();
   </script>
 </body>
 </html>
-
