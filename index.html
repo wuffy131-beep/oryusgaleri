@@ -18,8 +18,8 @@
   <main>
     <section id="kapaliEkran" class="hidden">
       <div class="kapanis">
-        <h2>🕒 Şu anda çalışma saatlerimiz dışında!</h2>
-        <p>Çalışma saatlerimiz: 15:00 - 22:00</p>
+        <h2>🕒 Şu anda site kapalı!</h2>
+        <p>Yönetici tarafından geçici olarak kapatılmıştır.</p>
         <button onclick="window.location='ilanlar.html'">İlanları Gör</button>
       </div>
     </section>
@@ -42,33 +42,38 @@
     const API = "https://oryusgaleri.vercel.app/api";
 
     async function kontrolEt() {
-      const res = await fetch(`${API}/status`);
-      const data = await res.json();
-      const saat = new Date().getHours();
+      try {
+        const res = await fetch(`${API}/status`);
+        const data = await res.json();
 
-      const aktifSaat = saat >= 15 && saat < 22;
-      const sistemAcik = data.aktif && aktifSaat;
-
-      if (!sistemAcik) {
-        document.getElementById("kapaliEkran").classList.remove("hidden");
-        document.getElementById("ilanlar").classList.add("hidden");
-      } else {
-        ilanlariGetir();
+        if (!data.aktif) {
+          document.getElementById("kapaliEkran").classList.remove("hidden");
+          document.getElementById("ilanlar").classList.add("hidden");
+        } else {
+          ilanlariGetir();
+        }
+      } catch (e) {
+        document.getElementById("ilanListesi").innerHTML = "<p style='color:red;'>Sunucuya bağlanılamadı.</p>";
       }
     }
 
     async function ilanlariGetir() {
       const list = document.getElementById("ilanListesi");
-      const res = await fetch(`${API}/ilanlar`);
-      const data = await res.json();
-      list.innerHTML = data.map(i => `
-        <div class="ilan">
-          <img src="${i.resim}" alt="">
-          <h3>${i.baslik}</h3>
-          <p>${i.aciklama}</p>
-          <p><b>${i.fiyat || ""} TL</b></p>
-          <button onclick="alert('${i.aciklama.replace(/'/g, '')}')">Detay</button>
-        </div>`).join("");
+      try {
+        const res = await fetch(`${API}/ilanlar`);
+        const data = await res.json();
+        list.innerHTML = data.map(i => `
+          <div class="ilan">
+            <img src="${i.resim}" alt="">
+            <h3>${i.baslik}</h3>
+            <p>${i.aciklama}</p>
+            <p><b>${i.fiyat || ""} TL</b></p>
+            <button onclick="alert('${i.aciklama.replace(/'/g, '')}')">Detay</button>
+          </div>
+        `).join("");
+      } catch {
+        list.innerHTML = "<p style='color:red;'>İlanlar yüklenemedi.</p>";
+      }
     }
 
     kontrolEt();
