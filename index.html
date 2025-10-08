@@ -4,71 +4,39 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Oryus Galeri - Güvenilir Araç Alım Satım Platformu 🚗</title>
-
-    <!-- ✅ Google Search Console doğrulama etiketi -->
-    <meta name="google-site-verification" content="VetCJuV6wFuJJQmxd9B076wUJBj1BDumCXyHzolENdQ" />
-
-    <!-- 🔍 SEO Meta Etiketleri -->
-    <meta
-      name="description"
-      content="Oryus Galeri — Car Parking, ikinci el ve sıfır araçlar için güvenilir alım satım platformu. Takas, ilan, araç karşılaştırma ve daha fazlası!"
-    />
-    <meta
-      name="keywords"
-      content="Oryus Galeri, oyrus galeri, araba galerisi, ikinci el araba, sıfır araba, takas, araç ilanı, car parking, CMP, CMP1, araç, araba, oryus, oyrus, oyrus galeri, oryusgaleri, araba al sat, galerici, Oryus, araç satışı"
-    />
-    <meta name="author" content="Oryus Galeri" />
+    <meta name="description" content="Oryus Galeri - 2024 yılında kurulmuş, 2 arkadaş tarafından işletilen güvenilir araç alım satım platformu." />
+    <meta name="keywords" content="oryus galeri, araba galerisi, ikinci el araba, sıfır araba, oryus, oyrus galeri, car parking, takas yok, indirim yok, araç, cmp" />
     <meta name="theme-color" content="#1e3a8a" />
-
-    <!-- 🧠 Open Graph (Sosyal Paylaşım İçin) -->
-    <meta property="og:title" content="Oryus Galeri - Güvenilir Araç Alım Satım Platformu" />
-    <meta
-      property="og:description"
-      content="Oryus Galeri ile ikinci el ve sıfır araçları güvenle alıp satın! Takas, ilan ve iletişim bir arada."
-    />
-    <meta property="og:image" content="https://oryus-galeri.vercel.app/gorsel.png" />
-    <meta property="og:url" content="https://oryus-galeri.vercel.app" />
-    <meta property="og:type" content="website" />
-
-    <!-- 🎵 Sosyal Medya -->
-    <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="Oryus Galeri - Güvenilir Araç Alım Satım Platformu" />
-    <meta
-      name="twitter:description"
-      content="Car parking, araç takas, ikinci el ve sıfır araç ilanlarını görüntüleyin. Oryus Galeri farkıyla!"
-    />
-    <meta name="twitter:image" content="https://oryus-galeri.vercel.app/gorsel.png" />
-
     <link rel="stylesheet" href="style.css" />
+    <script defer src="script.js"></script>
   </head>
 
   <body>
     <header>
       <h1>🚗 Oryus Galeri</h1>
-      <nav>
+      <nav id="menu">
         <a href="index.html" class="active">Ana Sayfa</a>
-        <a href="admin.html">Admin Girişi</a>
+        <a href="ilanlar.html">İlanlar</a>
+        <a href="hakkimizda.html">Hakkımızda</a>
+        <a href="sss.html">SSS</a>
+        <a href="admin.html">Admin</a>
       </nav>
-      <button id="temaBtn">🌞</button>
+      <button id="menuBtn">☰</button>
     </header>
 
-    <main>
-      <section id="ilanlar">
-        <h2>Güncel İlanlar</h2>
-        <div id="ilanListesi" class="ilan-listesi">
-          <div class="loading">Yükleniyor...</div>
-        </div>
-      </section>
+    <main id="mainContent">
+      <h2>🕒 Çalışma Saatleri</h2>
+      <p>Oryus Galeri çalışma saatleri: <strong>15:00 - 22:00</strong></p>
+      <p id="statusText">Durum yükleniyor...</p>
+      <button id="ilanGorBtn" style="display:none;" onclick="window.location='ilanlar.html'">
+        📋 İlanları Görüntüle
+      </button>
     </main>
 
     <footer>
-      <div class="social">
-        <a href="https://www.instagram.com/oryusgaleri" target="_blank">📸 @oryusgaleri</a>
-        <a href="https://www.tiktok.com/@oryusgaleri2" target="_blank">🎵 @oryusgaleri2</a>
-      </div>
+      <p>📸 Instagram: <a href="https://www.instagram.com/oryusgaleri" target="_blank">@oryusgaleri</a></p>
+      <p>🎵 TikTok: <a href="https://www.tiktok.com/@oryusgaleri2" target="_blank">@oryusgaleri2</a></p>
       <p>© 2025 Oryus Galeri | Tüm Hakları Saklıdır</p>
     </footer>
-
-    <script src="script.js"></script>
   </body>
 </html>
