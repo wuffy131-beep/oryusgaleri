@@ -3,54 +3,305 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Admin Panel - Oryus Galeri</title>
+    <title>Admin Paneli - Oryus Galeri</title>
     <link rel="stylesheet" href="style.css" />
+    <style>
+      body {
+        font-family: "Segoe UI", sans-serif;
+        background: linear-gradient(135deg, #1e3a8a, #0f172a);
+        color: #f1f5f9;
+        margin: 0;
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: flex-start;
+      }
+
+      header {
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(10px);
+        padding: 1rem 2rem;
+        width: 100%;
+        text-align: center;
+        color: #fff;
+        font-size: 1.5rem;
+        font-weight: bold;
+        position: sticky;
+        top: 0;
+      }
+
+      .container {
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(10px);
+        border-radius: 15px;
+        padding: 2rem;
+        max-width: 450px;
+        width: 90%;
+        margin-top: 3rem;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+      }
+
+      .form-group {
+        margin-bottom: 1.2rem;
+      }
+
+      label {
+        display: block;
+        font-weight: 600;
+        margin-bottom: 0.3rem;
+      }
+
+      input,
+      textarea {
+        width: 100%;
+        padding: 0.6rem;
+        border-radius: 8px;
+        border: none;
+        outline: none;
+        font-size: 1rem;
+        background: rgba(255, 255, 255, 0.2);
+        color: white;
+      }
+
+      input::placeholder,
+      textarea::placeholder {
+        color: #cbd5e1;
+      }
+
+      button {
+        background: #2563eb;
+        color: white;
+        font-size: 1rem;
+        padding: 0.7rem 1.5rem;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: 0.3s;
+        width: 100%;
+      }
+
+      button:hover {
+        background: #1d4ed8;
+      }
+
+      .logout-btn {
+        margin-top: 1rem;
+        background: #ef4444;
+      }
+
+      .hidden {
+        display: none;
+      }
+
+      .ilan-item {
+        background: rgba(255, 255, 255, 0.15);
+        border-radius: 10px;
+        margin-top: 1rem;
+        padding: 1rem;
+        display: flex;
+        flex-direction: column;
+      }
+
+      .ilan-item img {
+        max-width: 100%;
+        border-radius: 8px;
+        margin-bottom: 0.5rem;
+      }
+
+      @media (max-width: 600px) {
+        .container {
+          padding: 1.5rem;
+        }
+      }
+    </style>
   </head>
   <body>
-    <header>
-      <h1>⚙️ Oryus Galeri - Admin Paneli</h1>
-      <div class="theme-toggle">
-        <button id="themeButton">🌙 / ☀️</button>
+    <header>🛠️ Admin Paneli</header>
+
+    <!-- Giriş Formu -->
+    <div id="loginForm" class="container">
+      <h2>🔐 Giriş Yap</h2>
+      <div class="form-group">
+        <label for="username">Kullanıcı Adı</label>
+        <input type="text" id="username" placeholder="Admin adı" />
       </div>
-    </header>
+      <div class="form-group">
+        <label for="password">Şifre</label>
+        <input type="password" id="password" placeholder="Şifre" />
+      </div>
+      <button onclick="girisYap()">Giriş Yap</button>
+      <p id="loginError" style="color: #fca5a5; margin-top: 0.5rem;"></p>
+    </div>
 
-    <main id="adminLogin">
-      <h2>🔑 Admin Girişi</h2>
-      <input id="username" type="text" placeholder="Kullanıcı adı" />
-      <input id="password" type="password" placeholder="Şifre" />
-      <button id="loginBtn">Giriş Yap</button>
-      <p id="loginResult"></p>
-    </main>
+    <!-- İlan Ekleme Paneli -->
+    <div id="adminPanel" class="container hidden">
+      <h2>📄 Yeni İlan Ekle</h2>
+      <div class="form-group">
+        <label for="baslik">Başlık</label>
+        <input id="baslik" placeholder="Örneğin: 2020 Model BMW" />
+      </div>
+      <div class="form-group">
+        <label for="aciklama">Açıklama</label>
+        <textarea id="aciklama" rows="3" placeholder="Detaylı açıklama..."></textarea>
+      </div>
+      <div class="form-group">
+        <label for="resim">Resim Yükle</label>
+        <input type="file" id="resim" accept="image/*" />
+      </div>
+      <div class="form-group">
+        <label for="instagram">Instagram</label>
+        <input id="instagram" placeholder="@oryusgaleri" />
+      </div>
+      <div class="form-group">
+        <label for="tiktok">TikTok</label>
+        <input id="tiktok" placeholder="@oryusgaleri2" />
+      </div>
+      <button onclick="ilanEkle()">İlan Ekle</button>
+      <button class="logout-btn" onclick="cikisYap()">Çıkış Yap</button>
+      <p id="panelMsg" style="margin-top: 0.5rem;"></p>
 
-    <main id="adminPanel" style="display:none;">
-      <section>
-        <h2>🆕 Yeni İlan Ekle</h2>
-        <input id="baslik" type="text" placeholder="İlan başlığı" />
-        <textarea id="aciklama" placeholder="Açıklama"></textarea>
-        <input id="resim" type="file" accept="image/*" />
-        <input id="instagram" type="text" placeholder="@Instagram" />
-        <input id="tiktok" type="text" placeholder="@Tiktok" />
-        <button id="ilanEkleBtn">İlan Ekle</button>
-        <p id="ilanSonuc"></p>
-      </section>
+      <h3>📋 Mevcut İlanlar</h3>
+      <div id="ilanListesi"></div>
+    </div>
 
-      <section>
-        <h2>🗑️ İlanlar</h2>
-        <div id="ilanListesi"></div>
-      </section>
+    <script>
+      const API_BASE = "https://oryusgaleri.vercel.app/api";
+      let token = localStorage.getItem("adminToken");
 
-      <section id="logSection" style="display:none;">
-        <h2>📜 Log Kayıtları</h2>
-        <div id="logListesi">Yükleniyor...</div>
-      </section>
+      document.addEventListener("DOMContentLoaded", () => {
+        if (token) {
+          document.getElementById("loginForm").classList.add("hidden");
+          document.getElementById("adminPanel").classList.remove("hidden");
+          ilanlariGetir();
+        }
+      });
 
-      <button id="cikisBtn" style="margin-top:20px;">🚪 Çıkış Yap</button>
-    </main>
+      async function girisYap() {
+        const username = document.getElementById("username").value.trim();
+        const password = document.getElementById("password").value.trim();
+        const error = document.getElementById("loginError");
 
-    <footer>
-      <p>© 2025 Oryus Galeri</p>
-    </footer>
+        error.textContent = "";
 
-    <script src="script.js"></script>
+        try {
+          const res = await fetch(`${API_BASE}/login`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ username, password }),
+          });
+
+          const data = await res.json();
+          if (!res.ok) throw new Error(data.error || "Giriş başarısız");
+
+          localStorage.setItem("adminToken", data.token);
+          token = data.token;
+
+          document.getElementById("loginForm").classList.add("hidden");
+          document.getElementById("adminPanel").classList.remove("hidden");
+
+          ilanlariGetir();
+        } catch (err) {
+          error.textContent = "❌ " + err.message;
+        }
+      }
+
+      async function ilanlariGetir() {
+        const list = document.getElementById("ilanListesi");
+        list.innerHTML = "<p>Yükleniyor...</p>";
+
+        try {
+          const res = await fetch(`${API_BASE}/ilanlar`);
+          const data = await res.json();
+
+          if (!data.length) {
+            list.innerHTML = "<p>Henüz ilan yok.</p>";
+            return;
+          }
+
+          list.innerHTML = "";
+          data.forEach((ilan) => {
+            const div = document.createElement("div");
+            div.className = "ilan-item";
+            div.innerHTML = `
+              <img src="${ilan.resim}" alt="İlan">
+              <h4>${ilan.baslik}</h4>
+              <p>${ilan.aciklama}</p>
+              <button onclick="ilanSil(${ilan.id})">Sil</button>
+            `;
+            list.appendChild(div);
+          });
+        } catch (e) {
+          list.innerHTML = "<p style='color:red;'>❌ " + e.message + "</p>";
+        }
+      }
+
+      async function ilanEkle() {
+        const panelMsg = document.getElementById("panelMsg");
+        panelMsg.textContent = "";
+
+        const baslik = document.getElementById("baslik").value.trim();
+        const aciklama = document.getElementById("aciklama").value.trim();
+        const instagram = document.getElementById("instagram").value.trim();
+        const tiktok = document.getElementById("tiktok").value.trim();
+        const resimDosya = document.getElementById("resim").files[0];
+
+        if (!baslik || !aciklama) {
+          panelMsg.textContent = "❌ Lütfen tüm alanları doldurun.";
+          return;
+        }
+
+        const reader = new FileReader();
+        reader.onload = async () => {
+          const resim = reader.result;
+
+          try {
+            const res = await fetch(`${API_BASE}/addIlan`, {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${token}`,
+              },
+              body: JSON.stringify({ baslik, aciklama, resim, instagram, tiktok }),
+            });
+
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.error || "İlan eklenemedi");
+
+            panelMsg.textContent = "✅ İlan başarıyla eklendi.";
+            ilanlariGetir();
+          } catch (err) {
+            panelMsg.textContent = "❌ " + err.message;
+          }
+        };
+        reader.readAsDataURL(resimDosya);
+      }
+
+      async function ilanSil(id) {
+        if (!confirm("Bu ilanı silmek istediğine emin misin?")) return;
+
+        try {
+          const res = await fetch(`${API_BASE}/deleteIlan?id=${id}`, {
+            method: "DELETE",
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          });
+
+          const data = await res.json();
+          if (!res.ok) throw new Error(data.error || "Silinemedi");
+
+          alert("✅ İlan silindi!");
+          ilanlariGetir();
+        } catch (err) {
+          alert("❌ " + err.message);
+        }
+      }
+
+      function cikisYap() {
+        localStorage.removeItem("adminToken");
+        location.reload();
+      }
+    </script>
   </body>
 </html>
