@@ -1,54 +1,72 @@
-document.addEventListener("DOMContentLoaded", () => {
-  ilanlariGetir();
+body {
+  font-family: "Poppins", sans-serif;
+  background: #f0f4ff;
+  color: #222;
+  margin: 0;
+}
 
-  const temaBtn = document.getElementById("temaBtn");
-  temaBtn.addEventListener("click", () => {
-    const mevcut = document.body.getAttribute("data-theme");
-    if (mevcut === "dark") {
-      document.body.removeAttribute("data-theme");
-      temaBtn.textContent = "🌞";
-    } else {
-      document.body.setAttribute("data-theme", "dark");
-      temaBtn.textContent = "🌙";
-    }
-  });
-});
+header {
+  background: #1e3a8a;
+  color: white;
+  padding: 1rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
 
-async function ilanlariGetir() {
-  const ilanListesi = document.getElementById("ilanListesi");
-  ilanListesi.innerHTML = "<div class='loading'>🚗 Yükleniyor...</div>";
+nav {
+  display: flex;
+  gap: 1rem;
+}
 
-  try {
-    const res = await fetch("https://oryusgaleri.vercel.app/api/ilanlar");
-    console.log("API Durumu:", res.status);
+nav a {
+  color: white;
+  text-decoration: none;
+  font-weight: 500;
+}
 
-    if (!res.ok) throw new Error("Sunucudan geçerli yanıt alınamadı.");
+nav a.active {
+  text-decoration: underline;
+}
 
-    const data = await res.json();
-    console.log("API Verisi:", data);
+#menuBtn {
+  display: none;
+  background: none;
+  border: none;
+  font-size: 1.8rem;
+  color: white;
+}
 
-    if (!data || data.length === 0) {
-      ilanListesi.innerHTML = "<p style='text-align:center;'>Henüz ilan eklenmemiş.</p>";
-      return;
-    }
+main {
+  padding: 2rem;
+  text-align: center;
+}
 
-    ilanListesi.innerHTML = "";
-    data.forEach((ilan) => {
-      const card = document.createElement("div");
-      card.className = "ilan";
-      card.innerHTML = `
-        <img src="${ilan.resim || "https://via.placeholder.com/300"}" alt="İlan Görseli">
-        <h3>${ilan.baslik}</h3>
-        <p>${ilan.aciklama}</p>
-        <div class="sosyal">
-          <a href="https://www.instagram.com/${ilan.instagram}" target="_blank">📸 Instagram</a>
-          <a href="https://www.tiktok.com/@${ilan.tiktok}" target="_blank">🎵 Tiktok</a>
-        </div>
-      `;
-      ilanListesi.appendChild(card);
-    });
-  } catch (err) {
-    console.error("Hata:", err);
-    ilanListesi.innerHTML = `<p style='color:red; text-align:center;'>❌ Hata: ${err.message}</p>`;
+.content {
+  max-width: 600px;
+  margin: auto;
+  text-align: left;
+}
+
+footer {
+  background: #1e3a8a;
+  color: white;
+  text-align: center;
+  padding: 1rem;
+}
+
+@media (max-width: 768px) {
+  nav {
+    display: none;
+    flex-direction: column;
+    background: #1e3a8a;
+    text-align: center;
+    padding: 1rem;
+  }
+  nav.show {
+    display: flex;
+  }
+  #menuBtn {
+    display: block;
   }
 }
