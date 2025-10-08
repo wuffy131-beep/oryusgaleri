@@ -36,7 +36,7 @@
         backdrop-filter: blur(10px);
         border-radius: 15px;
         padding: 2rem;
-        max-width: 450px;
+        max-width: 480px;
         width: 90%;
         margin-top: 3rem;
         box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
@@ -114,6 +114,11 @@
           padding: 1.5rem;
         }
       }
+
+      .price-tag {
+        color: #22c55e;
+        font-weight: bold;
+      }
     </style>
   </head>
   <body>
@@ -134,31 +139,42 @@
       <p id="loginError" style="color: #fca5a5; margin-top: 0.5rem;"></p>
     </div>
 
-    <!-- İlan Ekleme Paneli -->
+    <!-- Admin Paneli -->
     <div id="adminPanel" class="container hidden">
       <h2>📄 Yeni İlan Ekle</h2>
+
       <div class="form-group">
         <label for="baslik">Başlık</label>
         <input id="baslik" placeholder="Örneğin: 2020 Model BMW" />
       </div>
+
       <div class="form-group">
         <label for="aciklama">Açıklama</label>
         <textarea id="aciklama" rows="3" placeholder="Detaylı açıklama..."></textarea>
       </div>
+
+      <div class="form-group">
+        <label for="fiyat">Fiyat (TL)</label>
+        <input id="fiyat" placeholder="Örneğin: 350000" />
+      </div>
+
       <div class="form-group">
         <label for="resim">Resim Yükle</label>
         <input type="file" id="resim" accept="image/*" />
       </div>
+
       <div class="form-group">
         <label for="instagram">Instagram</label>
         <input id="instagram" placeholder="@oryusgaleri" />
       </div>
+
       <div class="form-group">
         <label for="tiktok">TikTok</label>
         <input id="tiktok" placeholder="@oryusgaleri2" />
       </div>
-      <button onclick="ilanEkle()">İlan Ekle</button>
-      <button class="logout-btn" onclick="cikisYap()">Çıkış Yap</button>
+
+      <button onclick="ilanEkle()">📤 İlan Ekle</button>
+      <button class="logout-btn" onclick="cikisYap()">🚪 Çıkış Yap</button>
       <p id="panelMsg" style="margin-top: 0.5rem;"></p>
 
       <h3>📋 Mevcut İlanlar</h3>
@@ -166,7 +182,7 @@
     </div>
 
     <script>
-      const API_BASE = "https://oryusgaleri.vercel.app/api";
+      const API_BASE = "/api";
       let token = localStorage.getItem("adminToken");
 
       document.addEventListener("DOMContentLoaded", () => {
@@ -199,7 +215,6 @@
 
           document.getElementById("loginForm").classList.add("hidden");
           document.getElementById("adminPanel").classList.remove("hidden");
-
           ilanlariGetir();
         } catch (err) {
           error.textContent = "❌ " + err.message;
@@ -227,6 +242,7 @@
               <img src="${ilan.resim}" alt="İlan">
               <h4>${ilan.baslik}</h4>
               <p>${ilan.aciklama}</p>
+              <p class="price-tag">💸 ${ilan.fiyat || "Belirtilmedi"} TL</p>
               <button onclick="ilanSil(${ilan.id})">Sil</button>
             `;
             list.appendChild(div);
@@ -242,11 +258,12 @@
 
         const baslik = document.getElementById("baslik").value.trim();
         const aciklama = document.getElementById("aciklama").value.trim();
+        const fiyat = document.getElementById("fiyat").value.trim();
         const instagram = document.getElementById("instagram").value.trim();
         const tiktok = document.getElementById("tiktok").value.trim();
         const resimDosya = document.getElementById("resim").files[0];
 
-        if (!baslik || !aciklama) {
+        if (!baslik || !aciklama || !fiyat) {
           panelMsg.textContent = "❌ Lütfen tüm alanları doldurun.";
           return;
         }
@@ -262,7 +279,7 @@
                 "Content-Type": "application/json",
                 Authorization: `Bearer ${token}`,
               },
-              body: JSON.stringify({ baslik, aciklama, resim, instagram, tiktok }),
+              body: JSON.stringify({ baslik, aciklama, fiyat, resim, instagram, tiktok }),
             });
 
             const data = await res.json();
@@ -283,9 +300,7 @@
         try {
           const res = await fetch(`${API_BASE}/deleteIlan?id=${id}`, {
             method: "DELETE",
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
+            headers: { Authorization: `Bearer ${token}` },
           });
 
           const data = await res.json();
