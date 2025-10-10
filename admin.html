@@ -15,7 +15,6 @@
         display: flex;
         flex-direction: column;
         align-items: center;
-        justify-content: flex-start;
       }
 
       header {
@@ -31,19 +30,41 @@
         top: 0;
       }
 
+      nav {
+        margin-top: 10px;
+        display: flex;
+        justify-content: center;
+        gap: 15px;
+      }
+
+      nav a {
+        color: #cbd5e1;
+        text-decoration: none;
+        font-weight: 600;
+        padding: 6px 12px;
+        border-radius: 8px;
+        transition: 0.3s;
+      }
+
+      nav a:hover,
+      nav a.active {
+        background: #2563eb;
+        color: white;
+      }
+
       .container {
         background: rgba(255, 255, 255, 0.1);
         backdrop-filter: blur(10px);
         border-radius: 15px;
         padding: 2rem;
-        max-width: 500px;
+        max-width: 450px;
         width: 90%;
         margin-top: 2rem;
         box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
       }
 
       .form-group {
-        margin-bottom: 1.2rem;
+        margin-bottom: 1rem;
       }
 
       label {
@@ -64,6 +85,11 @@
         color: white;
       }
 
+      input::placeholder,
+      textarea::placeholder {
+        color: #cbd5e1;
+      }
+
       button {
         background: #2563eb;
         color: white;
@@ -74,7 +100,6 @@
         cursor: pointer;
         transition: 0.3s;
         width: 100%;
-        margin-top: 0.5rem;
       }
 
       button:hover {
@@ -95,6 +120,8 @@
         border-radius: 10px;
         margin-top: 1rem;
         padding: 1rem;
+        display: flex;
+        flex-direction: column;
       }
 
       .ilan-item img {
@@ -103,26 +130,26 @@
         margin-bottom: 0.5rem;
       }
 
-      .logs {
-        max-height: 200px;
-        overflow-y: auto;
-        background: rgba(0, 0, 0, 0.2);
-        border-radius: 8px;
+      /* Log kutusu */
+      .log-box {
+        background: rgba(255, 255, 255, 0.15);
+        border-radius: 10px;
         padding: 1rem;
-        font-size: 0.9rem;
-      }
-
-      @media (max-width: 600px) {
-        .container {
-          padding: 1.5rem;
-        }
+        margin-bottom: 1rem;
       }
     </style>
   </head>
+
   <body>
     <header>🛠️ Admin Paneli</header>
 
-    <!-- 🔐 Giriş -->
+    <nav>
+      <a href="#" id="navIlan" class="active" onclick="showTab('ilanlar')">İlanlar</a>
+      <a href="#" id="navLog" onclick="showTab('loglar')">Loglar</a>
+      <a href="#" class="logout-btn" onclick="cikisYap()">Çıkış</a>
+    </nav>
+
+    <!-- Giriş Formu -->
     <div id="loginForm" class="container">
       <h2>🔐 Giriş Yap</h2>
       <div class="form-group">
@@ -137,165 +164,186 @@
       <p id="loginError" style="color: #fca5a5; margin-top: 0.5rem;"></p>
     </div>
 
-    <!-- 🧩 Admin Panel -->
-    <div id="adminPanel" class="container hidden">
+    <!-- İlan Paneli -->
+    <div id="ilanPanel" class="container hidden">
       <h2>📄 Yeni İlan Ekle</h2>
-
       <div class="form-group">
         <label for="baslik">Başlık</label>
         <input id="baslik" placeholder="Örneğin: 2020 Model BMW" />
       </div>
-
       <div class="form-group">
         <label for="aciklama">Açıklama</label>
         <textarea id="aciklama" rows="3" placeholder="Detaylı açıklama..."></textarea>
       </div>
-
       <div class="form-group">
-        <label for="fiyat">Fiyat (TL)</label>
-        <input id="fiyat" placeholder="Örneğin: 500000" />
+        <label for="fiyat">Fiyat (₺)</label>
+        <input id="fiyat" type="number" placeholder="Örneğin: 500000" />
       </div>
-
       <div class="form-group">
         <label for="resim">Resim Yükle</label>
         <input type="file" id="resim" accept="image/*" />
       </div>
-
       <div class="form-group">
         <label for="instagram">Instagram</label>
         <input id="instagram" placeholder="@oryusgaleri" />
       </div>
-
       <div class="form-group">
         <label for="tiktok">TikTok</label>
         <input id="tiktok" placeholder="@oryusgaleri2" />
       </div>
-
       <button onclick="ilanEkle()">İlan Ekle</button>
 
-      <h3>📋 İlanlar</h3>
+      <h3>📋 Mevcut İlanlar</h3>
       <div id="ilanListesi"></div>
+    </div>
 
-      <h3>⚙️ Site Durumu</h3>
-      <button onclick="siteDurumu(true)">Siteyi Aç</button>
-      <button onclick="siteDurumu(false)">Siteyi Kapat</button>
-
-      <div id="logPanel" class="hidden">
-        <h3>🧾 Loglar (Sadece WUFFYMUCUK)</h3>
-        <div id="logListesi" class="logs"></div>
-      </div>
-
-      <button class="logout-btn" onclick="cikisYap()">Çıkış Yap</button>
+    <!-- Log Paneli -->
+    <div id="logPanel" class="container hidden">
+      <h2>📜 Log Kayıtları</h2>
+      <div id="logListesi">Yükleniyor...</div>
     </div>
 
     <script>
-      const API = "https://oryusgaleri.vercel.app/api";
+      const API_BASE = "https://oryusgaleri.vercel.app/api";
       let token = localStorage.getItem("adminToken");
-      let currentUser = "";
 
       document.addEventListener("DOMContentLoaded", () => {
-        if (token) initPanel();
+        if (token) {
+          document.getElementById("loginForm").classList.add("hidden");
+          document.getElementById("ilanPanel").classList.remove("hidden");
+          ilanlariGetir();
+        }
       });
+
+      function showTab(tab) {
+        document.getElementById("ilanPanel").classList.add("hidden");
+        document.getElementById("logPanel").classList.add("hidden");
+        document.getElementById("navIlan").classList.remove("active");
+        document.getElementById("navLog").classList.remove("active");
+
+        if (tab === "ilanlar") {
+          document.getElementById("ilanPanel").classList.remove("hidden");
+          document.getElementById("navIlan").classList.add("active");
+          ilanlariGetir();
+        } else if (tab === "loglar") {
+          document.getElementById("logPanel").classList.remove("hidden");
+          document.getElementById("navLog").classList.add("active");
+          loglariGetir();
+        }
+      }
 
       async function girisYap() {
         const username = document.getElementById("username").value.trim();
         const password = document.getElementById("password").value.trim();
+        const error = document.getElementById("loginError");
 
         try {
-          const res = await fetch(`${API}/login`, {
+          const res = await fetch(`${API_BASE}/login`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ username, password }),
           });
+
           const data = await res.json();
-          if (!res.ok) throw new Error(data.error);
+          if (!res.ok) throw new Error(data.error || "Giriş başarısız");
 
+          localStorage.setItem("adminToken", data.token);
           token = data.token;
-          currentUser = username;
-          localStorage.setItem("adminToken", token);
-          initPanel();
-        } catch (e) {
-          document.getElementById("loginError").textContent = "❌ " + e.message;
-        }
-      }
 
-      async function initPanel() {
-        document.getElementById("loginForm").classList.add("hidden");
-        document.getElementById("adminPanel").classList.remove("hidden");
-        ilanlariGetir();
-        if (currentUser === "WUFFYMUCUK") loglariGetir();
+          document.getElementById("loginForm").classList.add("hidden");
+          document.getElementById("ilanPanel").classList.remove("hidden");
+          ilanlariGetir();
+        } catch (err) {
+          error.textContent = "❌ " + err.message;
+        }
       }
 
       async function ilanlariGetir() {
         const list = document.getElementById("ilanListesi");
-        const res = await fetch(`${API}/ilanlar`);
-        const data = await res.json();
-        list.innerHTML = data.map(
-          (i) => `
-          <div class="ilan-item">
-            <img src="${i.resim}" alt="resim" />
-            <h4>${i.baslik}</h4>
-            <p>${i.aciklama}</p>
-            <p><b>${i.fiyat} TL</b></p>
-            <button onclick="ilanSil(${i.id})">Sil</button>
-          </div>`
-        ).join("");
+        list.innerHTML = "<p>Yükleniyor...</p>";
+
+        try {
+          const res = await fetch(`${API_BASE}/ilanlar`);
+          const data = await res.json();
+          list.innerHTML = "";
+
+          data.forEach((ilan) => {
+            const div = document.createElement("div");
+            div.className = "ilan-item";
+            div.innerHTML = `
+              <img src="${ilan.resim}" alt="İlan">
+              <h4>${ilan.baslik}</h4>
+              <p>${ilan.aciklama}</p>
+              <p><strong>Fiyat:</strong> ${ilan.fiyat ? ilan.fiyat + " ₺" : "Belirtilmemiş"}</p>
+              <button onclick="ilanSil(${ilan.id})">Sil</button>
+            `;
+            list.appendChild(div);
+          });
+        } catch {
+          list.innerHTML = "<p style='color:red;'>❌ İlanlar yüklenemedi.</p>";
+        }
       }
 
       async function ilanEkle() {
-        const baslik = document.getElementById("baslik").value;
-        const aciklama = document.getElementById("aciklama").value;
-        const fiyat = document.getElementById("fiyat").value;
-        const instagram = document.getElementById("instagram").value;
-        const tiktok = document.getElementById("tiktok").value;
-        const resimDosya = document.getElementById("resim").files[0];
-        const reader = new FileReader();
+        const baslik = baslik.value.trim();
+        const aciklama = aciklama.value.trim();
+        const fiyat = fiyat.value.trim();
+        const instagram = instagram.value.trim();
+        const tiktok = tiktok.value.trim();
+        const resimDosya = resim.files[0];
+        if (!baslik || !aciklama || !resimDosya) return alert("Lütfen tüm alanları doldurun!");
 
+        const reader = new FileReader();
         reader.onload = async () => {
-          const resim = reader.result;
-          const res = await fetch(`${API}/addIlan`, {
+          const resimData = reader.result;
+          const body = { baslik, aciklama, fiyat, instagram, tiktok, resim: resimData };
+
+          const res = await fetch(`${API_BASE}/addIlan`, {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
               Authorization: `Bearer ${token}`,
             },
-            body: JSON.stringify({ baslik, aciklama, fiyat, resim, instagram, tiktok }),
+            body: JSON.stringify(body),
           });
-          await res.json();
-          ilanlariGetir();
+          if (res.ok) {
+            alert("✅ İlan eklendi!");
+            ilanlariGetir();
+          } else alert("❌ Hata oluştu.");
         };
         reader.readAsDataURL(resimDosya);
       }
 
       async function ilanSil(id) {
-        await fetch(`${API}/deleteIlan?id=${id}`, {
+        if (!confirm("Bu ilanı silmek istediğine emin misin?")) return;
+        const res = await fetch(`${API_BASE}/deleteIlan?id=${id}`, {
           method: "DELETE",
           headers: { Authorization: `Bearer ${token}` },
         });
-        ilanlariGetir();
-      }
-
-      async function siteDurumu(aktif) {
-        await fetch(`${API}/status`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({ aktif }),
-        });
-        alert(aktif ? "✅ Site açıldı" : "⛔ Site kapatıldı");
+        if (res.ok) {
+          alert("✅ Silindi!");
+          ilanlariGetir();
+        } else alert("❌ Silinemedi.");
       }
 
       async function loglariGetir() {
-        document.getElementById("logPanel").classList.remove("hidden");
-        const res = await fetch(`${API}/logs`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        const data = await res.json();
-        document.getElementById("logListesi").innerHTML = data.map(
-          (l) => `<p>[${l.created_at}] <b>${l.admin}</b> - ${l.action}: ${l.detail}</p>`
-        ).join("");
+        const list = document.getElementById("logListesi");
+        list.innerHTML = "Yükleniyor...";
+        try {
+          const res = await fetch(`${API_BASE}/logs`, {
+            headers: { Authorization: `Bearer ${token}` },
+          });
+          const data = await res.json();
+          list.innerHTML = "";
+          data.forEach((log) => {
+            const div = document.createElement("div");
+            div.className = "log-box";
+            div.innerHTML = `<strong>${log.admin}</strong> → ${log.action}<br><small>${log.detail}</small><br><small>${log.created_at}</small>`;
+            list.appendChild(div);
+          });
+        } catch {
+          list.innerHTML = "<p style='color:red;'>❌ Loglar yüklenemedi.</p>";
+        }
       }
 
       function cikisYap() {
