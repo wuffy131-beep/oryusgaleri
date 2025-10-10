@@ -53,7 +53,8 @@
       }
 
       input,
-      textarea {
+      textarea,
+      select {
         width: 100%;
         padding: 0.6rem;
         border-radius: 8px;
@@ -104,7 +105,7 @@
       }
 
       .logs {
-        max-height: 250px;
+        max-height: 350px;
         overflow-y: auto;
         background: rgba(0, 0, 0, 0.2);
         border-radius: 8px;
@@ -113,7 +114,7 @@
       }
 
       .log-entry {
-        margin-bottom: 10px;
+        margin-bottom: 12px;
         padding: 8px;
         border-bottom: 1px solid rgba(255, 255, 255, 0.2);
       }
@@ -123,9 +124,24 @@
         display: block;
       }
 
+      .log-filters {
+        display: flex;
+        gap: 0.5rem;
+        margin-bottom: 1rem;
+        align-items: center;
+      }
+
+      .log-filters input {
+        flex: 1;
+      }
+
       @media (max-width: 600px) {
         .container {
           padding: 1.5rem;
+        }
+
+        .log-filters {
+          flex-direction: column;
         }
       }
     </style>
@@ -133,7 +149,6 @@
   <body>
     <header>🛠️ Admin Paneli</header>
 
-    <!-- 🔐 Giriş -->
     <div id="loginForm" class="container">
       <h2>🔐 Giriş Yap</h2>
       <div class="form-group">
@@ -148,7 +163,6 @@
       <p id="loginError" style="color: #fca5a5; margin-top: 0.5rem;"></p>
     </div>
 
-    <!-- 🧩 Admin Panel -->
     <div id="adminPanel" class="container hidden">
       <h2>📄 Yeni İlan Ekle</h2>
 
@@ -187,15 +201,18 @@
       <h3>📋 İlanlar</h3>
       <div id="ilanListesi"></div>
 
-      <div id="adminTools" class="hidden">
-        <h3>⚙️ Site Durumu</h3>
-        <button onclick="siteDurumu(true)">✅ Siteyi Aç</button>
-        <button onclick="siteDurumu(false)">⛔ Siteyi Kapat</button>
-
-        <div id="logPanel" class="hidden">
-          <h3>🧾 Loglar (Sadece WUFFYMUCUK)</h3>
-          <div id="logListesi" class="logs"></div>
+      <div id="logPanel" class="hidden">
+        <h3>🧾 Loglar (WUFFYMUCUK)</h3>
+        <div class="log-filters">
+          <input id="logSearch" placeholder="🔍 Anahtar kelime (örn: BMW)" oninput="filtreleLoglar()" />
+          <select id="logFilter" onchange="filtreleLoglar()">
+            <option value="all">Tümü</option>
+            <option value="Ekleme">Ekleme</option>
+            <option value="Silme">Silme</option>
+            <option value="Güncelleme">Güncelleme</option>
+          </select>
         </div>
+        <div id="logListesi" class="logs"></div>
       </div>
 
       <button class="logout-btn" onclick="cikisYap()">Çıkış Yap</button>
@@ -205,6 +222,7 @@
       const API = "https://oryusgaleri.vercel.app/api";
       let token = localStorage.getItem("adminToken");
       let currentUser = "";
+      let tumLoglar = [];
 
       document.addEventListener("DOMContentLoaded", () => {
         if (token) initPanel();
@@ -235,8 +253,6 @@
       async function initPanel() {
         document.getElementById("loginForm").classList.add("hidden");
         document.getElementById("adminPanel").classList.remove("hidden");
-        document.getElementById("adminTools").classList.remove("hidden");
-
         ilanlariGetir();
         if (currentUser.toLowerCase() === "wuffymucuk") {
           document.getElementById("logPanel").classList.remove("hidden");
@@ -273,7 +289,7 @@
 
         reader.onload = async () => {
           const resim = reader.result;
-          const res = await fetch(`${API}/addIlan`, {
+          await fetch(`${API}/addIlan`, {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
@@ -281,8 +297,8 @@
             },
             body: JSON.stringify({ baslik, aciklama, fiyat, resim, instagram, tiktok }),
           });
-          await res.json();
           ilanlariGetir();
+          loglariGetir();
         };
         reader.readAsDataURL(resimDosya);
       }
@@ -293,18 +309,7 @@
           headers: { Authorization: `Bearer ${token}` },
         });
         ilanlariGetir();
-      }
-
-      async function siteDurumu(aktif) {
-        await fetch(`${API}/status`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({ aktif }),
-        });
-        alert(aktif ? "✅ Site açıldı" : "⛔ Site kapatıldı");
+        loglariGetir();
       }
 
       async function loglariGetir() {
@@ -312,15 +317,32 @@
           headers: { Authorization: `Bearer ${token}` },
         });
         const data = await res.json();
+        tumLoglar = data;
+        renderLoglar(data);
+      }
+
+      function filtreleLoglar() {
+        const ara = document.getElementById("logSearch").value.toLowerCase();
+        const filtre = document.getElementById("logFilter").value;
+
+        const filtreli = tumLoglar.filter(
+          (l) =>
+            (filtre === "all" || l.action === filtre) &&
+            (l.detail.toLowerCase().includes(ara) || l.admin.toLowerCase().includes(ara))
+        );
+        renderLoglar(filtreli);
+      }
+
+      function renderLoglar(data) {
         document.getElementById("logListesi").innerHTML = data
           .map(
             (l) => `
-              <div class="log-entry">
-                <b>${l.admin}</b> - <span style="color:#60a5fa">${l.action}</span>
-                <small>${new Date(l.created_at).toLocaleString("tr-TR")}</small>
-                <div style="color:#d1d5db">${l.detail}</div>
-              </div>
-            `
+            <div class="log-entry">
+              <b>${l.admin}</b> - <span style="color:#60a5fa">${l.action}</span>
+              <small>${new Date(l.created_at).toLocaleString("tr-TR")}</small>
+              <div style="color:#d1d5db">${l.detail}</div>
+            </div>
+          `
           )
           .join("");
       }
