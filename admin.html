@@ -104,12 +104,23 @@
       }
 
       .logs {
-        max-height: 200px;
+        max-height: 250px;
         overflow-y: auto;
         background: rgba(0, 0, 0, 0.2);
         border-radius: 8px;
         padding: 1rem;
         font-size: 0.9rem;
+      }
+
+      .log-entry {
+        margin-bottom: 10px;
+        padding: 8px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+      }
+
+      .log-entry small {
+        color: #9ca3af;
+        display: block;
       }
 
       @media (max-width: 600px) {
@@ -303,8 +314,13 @@
         const data = await res.json();
         document.getElementById("logListesi").innerHTML = data
           .map(
-            (l) =>
-              `<p>[${l.created_at}] <b>${l.admin}</b> - ${l.action}: ${l.detail}</p>`
+            (l) => `
+              <div class="log-entry">
+                <b>${l.admin}</b> - <span style="color:#60a5fa">${l.action}</span>
+                <small>${new Date(l.created_at).toLocaleString("tr-TR")}</small>
+                <div style="color:#d1d5db">${l.detail}</div>
+              </div>
+            `
           )
           .join("");
       }
